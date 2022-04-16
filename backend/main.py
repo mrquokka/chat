@@ -1,11 +1,11 @@
+import json
 import os
+
 import flask
+from flask_socketio import SocketIO, emit
 
-from flask_socketio import SocketIO
-
-async_mode = None
 app = flask.Flask(__name__, static_url_path="")
-socket_ = SocketIO(app, async_mode=async_mode)
+socketio = SocketIO(app, async_mode=async_mode)
 
 STATIC_DIR = os.path.join(os.getcwd(), "static")
 
@@ -14,6 +14,22 @@ STATIC_DIR = os.path.join(os.getcwd(), "static")
 @app.errorhandler(404)
 def index(useless_error):
   return flask.send_from_directory(STATIC_DIR, "index.html"), 200
+
+
+@app.route("/api", methods=["POST"])
+def api_handler():
+  try:
+    data = json.loads(flask.request.data.decode("utf-8"))
+    print(json.dumps(data, indent=2))
+    raise AttributeError("stop")
+  except Exception as error:
+    # TODO журнал ошибок/взломов
+    return "3123123", 403
+
+
+@socketio.event
+def my_event(message):
+  emit("my response", {"data": "got it!"})
 
 
 # Этот код нужен только для дебага (если nginx/nodejs не запущен)
@@ -33,4 +49,4 @@ def send_static(path2, path3):
 
 if __name__ == "__main__":
   app.run(debug=True)
-  socket_.run(app, debug=True)
+  socketio.run(app, debug=True)

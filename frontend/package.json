@@ -10,12 +10,14 @@
     "@fontsource/open-sans": "^4.5.8",
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
+    "vue-cli-plugin-axios": "^0.0.4",
     "vue-router": "^4.0.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "axios": "^0.18.0",
     "coffee-loader": "^1.0.0",
     "coffeescript": ">= 2.0.0",
     "sass": "^1.32.7",

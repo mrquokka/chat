@@ -37,6 +37,8 @@
 </template>
 
 <script lang="coffee">
+import window_helpers from './../helpers/window.coffee'
+
 export default {
   data: () ->
     return {
@@ -98,7 +100,16 @@ export default {
     confirm_form: () ->
       if not @login? or not @password?
         return
-      console.log @is_on_register
+      if @is_on_register
+        action = 'register'
+      else
+        action = 'login'
+      await window_helpers.send_query({
+        action: action
+        login: @login
+        password: @password
+      })
+      console.log 'aee'
   }
 }
 </script>
