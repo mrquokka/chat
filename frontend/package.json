@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "QChat",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,10 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "coffee-loader": "^1.0.0",
+    "coffeescript": ">= 2.0.0",
     "sass": "^1.32.7",
-    "sass-loader": "^12.0.0"
+    "sass-loader": "^12.0.0",
+    "vue-cli-plugin-coffee": "~1.0.0"
   }
 }
