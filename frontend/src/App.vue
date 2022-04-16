@@ -10,7 +10,21 @@ export default {
 </style>
 
 <style lang="scss">
+@import "./css/colors.scss";
+
 body {
-  background: #8dffe8;
+  background: $default_background;
+  font-family: "Open Sans";
+  color: $default_text;
+  margin: 0px;
+  padding: 0px;
+}
+
+a {
+  text-decoration: none;
+}
+
+input:focus {
+  outline: unset;
 }
 </style>
