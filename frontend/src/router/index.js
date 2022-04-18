@@ -14,11 +14,13 @@ const routes = [
     component: login,
     transition: 'none'
   },
-  // {
-  //   path: '/register',
-  //   name: 'register',
-  //   component: () => import(/* webpackChunkName: "register" */ '../views/register.vue')
-  // }
+  {
+    path: '/chats',
+    name: 'chats',
+    component: () => import(
+      /* webpackChunkName: "chats" */ '../views/chats.vue'
+    )
+  }
 ]
 
 export default router.createRouter({

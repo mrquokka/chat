@@ -1,13 +1,33 @@
 <template>
-  <div>
-    <router-view />
-  </div>
+  <router-view v-if="is_tried_to_load" v-on:success_login="try_to_connect" />
 </template>
 
-<style lang="scss">
+<script lang="coffee">
+import window_helpers from './helpers/window.coffee'
+
 export default {
+  data: () ->
+    return {
+      is_tried_to_load: false
+      login: undefined
+    }
+
+  methods: {
+    try_to_connect: () ->
+      login = await window_helpers.connect()
+      @login = login
+      if login?
+        route_name = 'chats'
+      else
+        route_name = 'login'
+      @$router.push({name: route_name})
+      @is_tried_to_load = true
+  }
+
+  mounted: () ->
+    @try_to_connect()
 }
-</style>
+</script>
 
 <style lang="scss">
 @import "./css/colors.scss";
@@ -26,5 +46,14 @@ a {
 
 input:focus {
   outline: unset;
+}
+
+#app {
+  min-width: 480px;
+  overflow-y: auto;
+}
+
+.clear_block {
+  clear: both;
 }
 </style>

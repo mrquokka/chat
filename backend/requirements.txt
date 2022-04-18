@@ -1,4 +1,9 @@
 flask
 python-socketio
 Flask_SocketIO
-simple-websocket
+gevent
+gevent-websocket
+cryptography
+redis
+sqlalchemy
+psycopg2-binary

@@ -20,12 +20,12 @@
           <div class="label" v-html="field_info.label" />
           <input
             v-model="field_info.value"
-            :class="{ with_error: !field_info.value }"
+            :class="{ with_error: field_info.error }"
             :type="field_info.type"
             v-on:input="handler_input(field_name, $event)"
           />
           <div class="error_message">
-            <span v-if="!field_info.value" v-html="required_error" />
+            <span v-html="field_info.error" />
           </div>
         </div>
         <button>
@@ -40,11 +40,15 @@
 import window_helpers from './../helpers/window.coffee'
 
 export default {
+  emits: ['success_login']
+
   data: () ->
     return {
       login: undefined
       password: undefined
       is_already_exists: false
+      is_show_password_error: false
+      exists_logins: []
     }
 
   computed: {
@@ -78,38 +82,72 @@ export default {
     required_error: () ->
       return 'Обязательное поле'
 
+    invalid_login_password: () ->
+      return 'Неверный логин/пароль'
+
+    password_error: () ->
+      if @is_show_password_error
+        return @invalid_login_password
+      else if @is_empty_value(@password)
+        return @required_error
+      else
+        return undefined
+
+    name_error: () ->
+      if @is_empty_value(@login)
+        return @required_error
+      else if @is_on_register and @login in @exists_logins
+        return 'Это имя уже занято'
+      else if @is_show_password_error
+        return @invalid_login_password
+      else
+        return undefined
+
     fields: () ->
       return {
         login: {
           label: 'Логин'
           type: 'text'
           value: @login
+          error: @name_error
         }
         password: {
           label: 'Пароль'
           type: 'password'
           value: @password
+          error: @password_error
         }
       }
   }
 
   methods: {
+    is_empty_value: (value) ->
+      return not value? or value.trim().length == 0
+
     handler_input: (field_name, event) ->
       @[field_name] = event.target.value
+      @is_show_password_error = false
 
     confirm_form: () ->
-      if not @login? or not @password?
+      if @name_error? or @password_error?
         return
       if @is_on_register
         action = 'register'
       else
         action = 'login'
-      await window_helpers.send_query({
+      result = await window_helpers.send_query({
         action: action
         login: @login
         password: @password
       })
-      console.log 'aee'
+      if result == 'OK'
+        @$emit("success_login", true)
+      else if result == 'invalid password'
+        console.log 'set'
+        @is_show_password_error = true
+      else if result == 'error_is_busy'
+        @exists_logins.push(@login)
+      return
   }
 }
 </script>

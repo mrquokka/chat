@@ -1,13 +1,28 @@
 $default_background: #151521;
 $form_background: #1e1e2d;
 
+$default_text: #ffffff;
 $inactive_text: #474761;
+$second_text: #565674;
+
 $input_color: #92929f;
 $input_background: #1b1b29;
 $active_button_background: #3699ff;
 $active_hover_button_background: #187DE4;
 $error_color: #f64e60;
-$default_text: #fff;
-
 
 $border_background: #0b463a;
+$dash_color: #323248;
+
+
+$color_1: #0bb783;
+$color_2: #3699ff;
+$color_3: #ffA800;
+$color_4: #f64e60;
+
+:export {
+  color_1: $color_1;
+  color_2: $color_2;
+  color_3: $color_3;
+  color_4: $color_4;
+}

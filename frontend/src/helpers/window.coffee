@@ -1,23 +1,45 @@
 import axios from 'axios'
+import {io} from "socket.io-client"
 
-# Full config:  https://github.com/axios/axios#request-config
-# axios.defaults.baseURL = process.env.baseURL || process.env.apiUrl || '';
-# axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
-# axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+NAMESPACE = '/socket'
 
-_axios = axios.create({
-  # baseURL: process.env.baseURL || process.env.apiUrl || ""
-  # timeout: 60 * 1000, # Timeout
-  withCredentials: true
-})
+state = {
+  socket: undefined
+}
 
-setTimeout(() ->
-  socket = new WebSocket("ws://127.0.0.1:5000/")
-)
-
+#
+# socket.on('message', (msg) ->
+#   console.log('Received message', msg);
+# )
 
 export default {
   send_query: (data) ->
-    console.log data
-    return _axios.post('/api', data).then()
+    result = await axios.post('/api', data)
+    return result.data
+
+  connect: () ->
+    if state.socket?
+      return true
+    else
+      socket = io.connect(NAMESPACE)
+      return new Promise((resolve) ->
+        socket.on('connect', () ->
+          state.socket = socket
+          socket.emit('get_login', (login) ->
+            resolve(login)
+          )
+        )
+        socket.on('connect_error', () ->
+          resolve(undefined)
+        )
+      )
+  get_chats: () ->
+    if state.socket
+      promise = new Promise((resolve, reject ) ->
+        state.socket.emit('get_chats', (answer) ->
+          resolve(answer)
+        )
+      )
+      return promise
+    return
 }
