@@ -1,5 +1,10 @@
 <template>
-  <router-view v-if="is_tried_to_load" v-on:success_login="try_to_connect" />
+  <router-view
+    v-if="is_show_child"
+    :current_user="login"
+    v-on:success_login="success_login"
+    v-on:logout="logout"
+  />
 </template>
 
 <script lang="coffee">
@@ -12,12 +17,29 @@ export default {
       login: undefined
     }
 
+  computed: {
+    is_show_child: () ->
+      if not @is_tried_to_load
+        return false
+      return (@$route.name in ['login', 'register']) or @login
+  }
+
   methods: {
+    success_login: (login) ->
+      await window_helpers.connect()
+      @login = String(login)
+      @$router.push({name: "chats"})
+
+    logout: () ->
+      await window_helpers.send_query({action: "logout"})
+      @$router.push({name: "login"})
+
     try_to_connect: () ->
-      login = await window_helpers.connect()
-      @login = login
-      if login?
+      flag_result = await window_helpers.connect()
+      if flag_result
         route_name = 'chats'
+        login = await window_helpers.send_query({action: "get_login"})
+        @login = String(login)
       else
         route_name = 'login'
       @$router.push({name: route_name})

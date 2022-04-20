@@ -25,21 +25,29 @@ export default {
       return new Promise((resolve) ->
         socket.on('connect', () ->
           state.socket = socket
-          socket.emit('get_login', (login) ->
-            resolve(login)
-          )
+          resolve(true)
         )
         socket.on('connect_error', () ->
-          resolve(undefined)
+          resolve(false)
         )
       )
   get_chats: () ->
-    if state.socket
+    if state.socket?
       promise = new Promise((resolve, reject ) ->
         state.socket.emit('get_chats', (answer) ->
           resolve(answer)
         )
       )
       return promise
+    return
+
+  add_linstener: (event, handler) ->
+    if state.socket?
+      state.socket.on(event, handler)
+    return
+
+  remove_linstener: (event, handler) ->
+    if state.socket?
+      state.socket.off(event, handler)
     return
 }

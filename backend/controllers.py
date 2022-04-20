@@ -15,6 +15,7 @@ from data import (
   add_session_info,
   delete_session_info,
   get_all_chats,
+  add_message,
 )
 
 
@@ -31,23 +32,18 @@ def index(useless_error):
   return flask.send_from_directory(STATIC_DIR, "index.html"), 200
 
 
-@app.route("/api", methods=["POST"])
-def api_handler():
-  # try:
-  data = json.loads(flask.request.data.decode("utf-8"))
-  action = data.pop("action")
+def login_and_register(action, data):
   login = str(data["login"])
   password = str(data["password"])
-  print(action, login, password)
   if not login or not password:
     raise AttributeError("hack?")
   if action == "login":
     hash_password = get_login_hash(login)
-    print(hash_password, get_hash_of_password(password))
-    if not hash_password:
-      return "invalid password"
-    # TODO убрать дублирование, но пока не придумал как лучше
-    elif hash_password != get_hash_of_password(password):
+    if hash_password:
+      is_have_auth_error = hash_password != get_hash_of_password(password)
+    else:
+      is_have_auth_error = True
+    if is_have_auth_error:
       return "invalid password"
   # register block
   elif get_login_hash(login):
@@ -55,13 +51,52 @@ def api_handler():
   else:
     add_user(login, get_hash_of_password(password))
   cookie = crypter.encrypt(login.encode("utf-8")).decode("utf-8")
-  response = flask.make_response("OK")
+  response = flask.make_response(login)
   response.set_cookie("login", value=cookie)
   return response
 
 
-# except Exception as error:
-#   return make_ban(error)
+def send_message(sender, receiver, message):
+  if not sender or not receiver or not message:
+    raise AttributeError("hack attempt?")
+  unique_id, unix_time, data = add_message(sender, receiver, message)
+  data["unix_time"] = unix_time
+  socketio.emit(
+    "new_message",
+    data,
+    to=unique_id,
+    include_self=True,
+    namespace=NAMESPACE,
+  )
+  return "OK"
+
+
+@app.route("/api", methods=["POST"])
+def api_handler():
+  # try:
+  data = json.loads(flask.request.data.decode("utf-8"))
+  print(json.dumps(data, indent=2))
+  action = data.pop("action")
+  if action in ["login", "register"]:
+    return login_and_register(action, data)
+  login = get_login_from_cookie()
+  if not login:
+    raise AttributeError("unathorized user")
+  if action == "logout":
+    response = flask.make_response("OK")
+    response.delete_cookie("login")
+    return response
+  elif action == "get_login":
+    return login
+  elif action == "get_chats":
+    result = get_all_chats(login)
+    print(login, result)
+    return result
+  elif action == "send_message":
+    return send_message(login, data.get("receiver"), data.get("message"))
+  raise ValueError("unknown path")
+  # except Exception as error:
+  #   return make_ban(error)
 
 
 # Этот код нужен только для дебага (если nginx/nodejs не запущен)
@@ -75,7 +110,6 @@ def api_handler():
 @app.route("/<path:path2>", defaults={"path3": ""}, methods=["GET"])
 @app.route("/<path:path2>/<path:path3>", methods=["GET"])
 def send_static(path2, path3):
-  print(path2, path3)
   result_path = [STATIC_DIR]
   for item in path2, path3:
     if item:
@@ -92,19 +126,20 @@ def get_login_from_cookie():
       login = crypter.decrypt(login_cookie.encode("utf-8")).decode("utf-8")
       if login:
         hash = get_login_hash(login)
-        if hash:
-          add_session_info(flask.request.sid, login)
-          return login
+        sid = getattr(flask.request, "sid", None)
+        if not hash:
+          raise AttributeError("deleted account")
+        elif sid:
+          add_session_info(sid, login)
+        return login
     except Exception as error:
       make_ban(error)
 
 
 @socketio.on("connect", namespace=NAMESPACE)
-@socketio.on("get_login", namespace=NAMESPACE)
 def test_connect(auth=None):
-  login_from_cookie = get_login_from_cookie()
-  if login_from_cookie:
-    return login_from_cookie
+  if get_login_from_cookie():
+    return "OK"
   else:
     raise ConnectionRefusedError("need_login")
 
@@ -112,16 +147,3 @@ def test_connect(auth=None):
 @socketio.on("disconnect", namespace=NAMESPACE)
 def test_disconnect():
   delete_session_info(flask.request.sid)
-
-
-@socketio.event(namespace=NAMESPACE)
-def get_chats(*args):
-  login_from_cookie = get_login_from_cookie()
-  if login_from_cookie:
-    return get_all_chats(login_from_cookie)
-  else:
-    raise ConnectionRefusedError("need_login")
-
-
-# @socketio.event(namespace=NAMESPACE)
-# def register(sended_data):

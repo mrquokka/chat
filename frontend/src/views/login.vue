@@ -120,6 +120,11 @@ export default {
       }
   }
 
+  watch: {
+    is_show_password_error: () ->
+      @is_show_password_error = false
+  }
+
   methods: {
     is_empty_value: (value) ->
       return not value? or value.trim().length == 0
@@ -140,13 +145,12 @@ export default {
         login: @login
         password: @password
       })
-      if result == 'OK'
-        @$emit("success_login", true)
-      else if result == 'invalid password'
-        console.log 'set'
+      if result == 'invalid password'
         @is_show_password_error = true
       else if result == 'error_is_busy'
         @exists_logins.push(@login)
+      else
+        @$emit("success_login", result)
       return
   }
 }
