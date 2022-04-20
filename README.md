@@ -11,6 +11,7 @@ lazy-load messages
 send files
 send smiles
 multiusers chats
+OAuth
 
 Chat
 ![image](https://user-images.githubusercontent.com/36193265/164279233-78ee8679-605c-4e15-8f73-0132542ec2f9.png)
