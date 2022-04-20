@@ -1,6 +1,9 @@
 <template>
   <div v-if="chats" class="chats">
     <div class="list">
+      <div class="login">
+        {{ current_user }}
+      </div>
       <div class="chats_container">
         <chat_preview
           v-for="(messages, login_with_bugfix) in sorted_chats"
@@ -10,11 +13,12 @@
           :login="remove_bugfix_prefix(login_with_bugfix)"
           :current_user="current_user"
           :user_messages="messages"
+          :selected_user="selected_user"
           v-on:click="selected_user = remove_bugfix_prefix(login_with_bugfix)"
         />
       </div>
       <div class="logout" v-on:click="$emit('logout', $event)">
-        Выйти
+        <i class="material-icons">exit_to_app</i> <span>Выйти</span>
       </div>
     </div>
     <div class="content">
@@ -148,12 +152,26 @@ export default {
     width: 30%;
     background: $form_background;
 
+    > .login,
+    > .logout {
+      padding: 20px 20px 20px 24px;
+      line-height: 20px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    > .login {
+      border-bottom: 1px solid $default_background;
+    }
+
     > .chats_container {
-      height: calc(100% - 60px);
+      height: calc(100% - 121px);
       overflow-y: scroll;
 
       &::-webkit-scrollbar {
-        width: 8px;
+        // TODO hover scroll
+        // width: 8px;
+        width: 0px;
       }
 
       &:hover {
@@ -166,12 +184,19 @@ export default {
     }
 
     > .logout {
-      padding: 20px;
-      font-size: 14px;
-      font-weight: bold;
-      line-height: 20px;
-      cursor: pointer;
       transition: opacity 0.1s;
+      cursor: pointer;
+
+      > i,
+      > span {
+        float: left;
+        line-height: 20px;
+      }
+
+      > i {
+        font-weight: normal;
+        padding-right: 10px;
+      }
 
       &:hover {
         color: $error_color;

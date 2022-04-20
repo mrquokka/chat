@@ -2,13 +2,20 @@
   <div class="chat">
     <div class="messages">
       <div
-        v-for="(message_info, timestamp) in parsed_messages"
+        v-for="(message_info, timestamp) in messages"
         :key="timestamp"
-        class="message"
+        class="message_container"
         :class="{ is_receiver: message_info.receiver == current_user }"
       >
-        {{ message_info.message }}
-        <div class="datetime" v-html="timestamp" />
+        <div class="message">
+          {{ message_info.message }}
+          <div class="datetime" v-html="print_date(timestamp)" />
+        </div>
+        <user_preview
+          :current_user="current_user"
+          :login="message_info.receiver"
+          :without_favorites="true"
+        />
       </div>
     </div>
     <form class="text_container" v-on:submit.prevent.stop="confirm_form">
@@ -18,7 +25,14 @@
   </div>
 </template>
 <script lang="coffee">
+import user_preview from './user_preview.vue'
+import main_helpers from './../helpers/main.coffee'
+
 export default {
+  components: {
+    user_preview: user_preview
+  }
+
   props: {
     current_user: {type: String, required: true}
     selected_user: {type: String, required: true}
@@ -32,19 +46,10 @@ export default {
       current_text: ''
     }
 
-  computed: {
-    parsed_messages: () ->
-      dates = []
-      for timestamp in Object.keys(@messages)
-        dates.push(timestamp)
-      dates.sort()
-      result = {}
-      for date in dates
-        result[new Date(date * 1000).toString()] = @messages[date]
-      return result
-  }
-
   methods: {
+    print_date: (unix_time) ->
+      return main_helpers.print_date(unix_time, false)
+
     edit_text: (event) ->
       @current_text = event.target.innerText
 
@@ -71,19 +76,44 @@ export default {
     flex: 1 1 auto;
     padding: 20px;
 
-    > .message {
-      float: left;
+    > .message_container {
       clear: both;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 20px;
-      background: $form_background;
+      position: relative;
+      float: right;
 
-      & > .datetime {
+      > .message {
+        clear: both;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: $form_background;
+        margin-right: 50px;
+
+        & > .datetime {
+          font-size: 12px;
+          padding-top: 10px;
+          color: $active_button_background;
+        }
+      }
+
+      > .user_preview {
+        position: absolute;
+        bottom: 22px;
+        right: 0px;
       }
 
       &.is_receiver {
-        float: right;
+        float: left;
+
+        > .message {
+          margin-right: unset;
+          margin-left: 50px;
+        }
+
+        > .user_preview {
+          right: unset;
+          left: 0px;
+        }
       }
     }
   }

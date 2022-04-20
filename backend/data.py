@@ -5,6 +5,7 @@ import redis
 import sqlalchemy
 import flask_socketio
 
+from config import NAMESPACE
 from db import lock, User, Message, engine, Base
 
 # TODO postgres + sqlalchemy
@@ -64,12 +65,16 @@ with sqlalchemy.orm.Session(engine) as session:
   pipe.execute()
 
 
-def add_user(login, hash_password):
+def add_user(new_login, hash_password):
   lock.acquire()
   with sqlalchemy.orm.Session(engine) as session:
-    session.add(User(login=login, hash_password=hash_password))
+    session.add(User(login=new_login, hash_password=hash_password))
     session.commit()
-  connection.hset(KEY_FOR_LOGINGS, login, hash_password)
+  connection.hset(KEY_FOR_LOGINGS, new_login, hash_password)
+  for sid, login in connection.hgetall(KEY_FOR_SESSIONS).items():
+    flask_socketio.join_room(
+      make_unique_chat_id(new_login, login), sid=sid, namespace=NAMESPACE
+    )
   lock.release()
 
 
@@ -101,8 +106,7 @@ def get_all_chats(current_login):
   for login in logins:
     result[login] = {}
     unique_id = make_unique_chat_id(current_login, login)
-    for unix_time in connection.hgetall(unique_id):
-      description = connection.hget(unique_id, unix_time)
+    for unix_time, description in connection.hgetall(unique_id).items():
       result[login][unix_time] = json.loads(description)
   return result
 
