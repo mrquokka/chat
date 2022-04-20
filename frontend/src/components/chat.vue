@@ -1,6 +1,6 @@
 <template>
   <div class="chat">
-    <div class="messages">
+    <div ref="messages_container" class="messages">
       <div
         v-for="(message_info, timestamp) in messages"
         :key="timestamp"
@@ -8,8 +8,9 @@
         :class="{ is_receiver: message_info.receiver == current_user }"
       >
         <div class="message">
-          {{ message_info.message }}
+          <div class="text">{{ message_info.message }}</div>
           <div class="datetime" v-html="print_date(timestamp)" />
+          <div class="clear_block" />
         </div>
         <user_preview
           :current_user="current_user"
@@ -53,8 +54,24 @@ export default {
 
   mounted: () ->
     @$refs.input.focus()
+    @scroll_to_bottom()
+
+  watch: {
+    messages: {
+      deep: true
+
+      handler: () ->
+        @scroll_to_bottom()
+    }
+  }
 
   methods: {
+    scroll_to_bottom: () ->
+      setTimeout(() =>
+        messages_container = @$refs.messages_container
+        messages_container.scrollTop = messages_container.scrollHeight
+      )
+
     handler_keyup: (event) ->
       if event.code == 'Enter' and not event.ctrlKey and not event.shiftKey
         @confirm_form()
@@ -70,7 +87,6 @@ export default {
       text = @current_text.trim()
       if text.length == 0
         return
-      @$refs.input.blur()
       @$emit('send_message', text)
       @current_text = ''
       @$refs.input.innerText = null
@@ -105,10 +121,15 @@ export default {
         background: $form_background;
         margin-right: 50px;
 
-        & > .datetime {
+        > .text {
+          word-break: break-all;
+        }
+
+        > .datetime {
           font-size: 12px;
           padding-top: 10px;
           color: $active_button_background;
+          float: right;
         }
       }
 
