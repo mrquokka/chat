@@ -9,7 +9,14 @@
       >
         <div class="message">
           <div class="text">{{ message_info.message }}</div>
-          <div class="datetime" v-html="print_date(timestamp)" />
+          <div class="time_readed_info">
+            <span>{{ print_date(timestamp) }}</span>
+            <i
+              v-if="!is_favorites"
+              class="material-icons"
+              v-html="get_read_icon(message_info)"
+            />
+          </div>
           <div class="clear_block" />
         </div>
         <user_preview
@@ -52,6 +59,11 @@ export default {
       current_text: ''
     }
 
+  computed: {
+    is_favorites: () ->
+      return @current_user == @selected_user
+  }
+
   mounted: () ->
     @$refs.input.focus()
     @scroll_to_bottom()
@@ -66,6 +78,9 @@ export default {
   }
 
   methods: {
+    get_read_icon: (message_info) ->
+      return main_helpers.get_read_icon(message_info.is_readed)
+
     scroll_to_bottom: () ->
       setTimeout(() =>
         messages_container = @$refs.messages_container
@@ -125,11 +140,18 @@ export default {
           word-break: break-all;
         }
 
-        > .datetime {
+        > .time_readed_info {
           font-size: 12px;
           padding-top: 10px;
           color: $active_button_background;
           float: right;
+
+          > i {
+            font-size: 17px;
+            padding-left: 5px;
+            display: block;
+            float: right;
+          }
         }
       }
 
@@ -145,6 +167,10 @@ export default {
         > .message {
           margin-right: unset;
           margin-left: 50px;
+
+          > .time_readed_info {
+            float: left;
+          }
         }
 
         > .user_preview {

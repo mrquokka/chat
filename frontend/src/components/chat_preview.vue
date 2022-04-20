@@ -64,10 +64,7 @@ export default {
 
     readed_icon: () ->
       if @last_message? and not @is_favorites
-        if @last_message.is_readed
-          return 'done_all'
-        else
-          return 'done'
+        return main_helpers.get_read_icon(@last_message.is_readed)
       else
         return undefined
 

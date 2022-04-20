@@ -14,4 +14,9 @@ export default {
     else
       return moment_date.format('HH:mm, D MMMM')
 
+  get_read_icon: (is_readed) ->
+    if is_readed
+      return 'done_all'
+    else
+      return 'done'
 }

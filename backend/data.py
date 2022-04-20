@@ -138,6 +138,7 @@ def add_message(sender, receiver, message):
 def mark_readed_messages(messages_infos):
   messages_to_read = {}
   lock.acquire()
+  pipe = connection.pipeline()
   with sqlalchemy.orm.Session(engine) as session:
     for item in messages_infos:
       sender = item["sender"]
@@ -169,6 +170,9 @@ def mark_readed_messages(messages_infos):
         messages_to_read[unique_id].append(
           {"timestamp": timestamp, "sender": sender, "receiver": receiver}
         )
+        _1, _2, data = get_message_info(message)
+        pipe.hset(unique_id, timestamp, json.dumps(data))
     session.commit()
+  pipe.execute()
   lock.release()
   return messages_to_read
