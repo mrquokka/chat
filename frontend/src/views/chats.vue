@@ -14,7 +14,7 @@
           :current_user="current_user"
           :user_messages="messages"
           :selected_user="selected_user"
-          v-on:click="selected_user = remove_bugfix_prefix(login_with_bugfix)"
+          v-on:click="handler_select_user(login_with_bugfix)"
         />
       </div>
       <div class="logout" v-on:click="$emit('logout', $event)">
@@ -63,6 +63,9 @@ export default {
       chats: undefined
       selected_user: undefined
       check_new_messages_func: undefined
+      check_new_user_func: undefined
+      check_read_messages: undefined
+      check_read_messages: undefined
     }
 
   computed: {
@@ -86,11 +89,11 @@ export default {
       max_login_values.reverse()
       for item in max_login_values
         for login, messages_infos of by_users[item]
-          result[BUGFIX_PREFIX + login] = messages_infos
+          result[@make_bugfix_name(login)] = messages_infos
       return result
 
     messages: () ->
-      return @sorted_chats[BUGFIX_PREFIX + @selected_user]
+      return @sorted_chats[@make_bugfix_name(@selected_user)]
   }
 
   mounted: () ->
@@ -98,16 +101,57 @@ export default {
     @chats = chats
     @check_new_messages_func = @handler_new_message.bind(@)
     @check_new_user_func = @handler_new_user.bind(@)
+    @check_read_messages = @handler_read_messages.bind(@)
     window_helpers.add_linstener('new_message', @check_new_messages_func)
     window_helpers.add_linstener('new_user', @check_new_user_func)
+    window_helpers.add_linstener('read_messages', @check_read_messages)
 
   beforeDestroyed: () ->
     window_helpers.remove_linstener('new_message', @check_new_messages_func)
     window_helpers.remove_linstener('new_user', @check_new_user_func)
+    window_helpers.remove_linstener('read_messages', @check_read_messages)
 
   methods: {
+    make_bugfix_name: (login) ->
+      return BUGFIX_PREFIX + login
+
+    handler_select_user: (login_with_bugfix) ->
+      login = @remove_bugfix_prefix(login_with_bugfix)
+      @selected_user = login
+      @clear_messages()
+
+    clear_messages: () ->
+      if not @selected_user?
+        return
+      readed_messages = []
+      for unix_time, info of @messages
+        if info.receiver == @current_user and not info.is_readed
+          sender = info.sender
+          @chats[sender][unix_time].is_readed = true
+          readed_messages.push({
+            sender: sender
+            timestamp: unix_time
+          })
+      if readed_messages.length > 0
+        window_helpers.send_query({
+          action: "read_messages"
+          messages: readed_messages
+        })
+      return
+
     remove_bugfix_prefix: (login) ->
       return login.slice(BUGFIX_PREFIX.length)
+
+    handler_read_messages: (messages) ->
+      for message_info in messages
+        if message_info.sender != @current_user
+          chat_user = message_info.sender
+        else
+          chat_user = message_info.receiver
+        chat_info = @chats[chat_user]?[message_info.timestamp]
+        if not chat_info.is_readed
+          chat_info.is_readed = true
+      return
 
     handler_new_user: (login) ->
       if login not of @chats
@@ -122,6 +166,7 @@ export default {
       else
         key = data.sender
       @chats[key][unix_time] = data
+      @clear_messages()
 
     handler_send_message: (message) ->
       window_helpers.send_query({

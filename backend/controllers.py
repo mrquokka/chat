@@ -16,6 +16,7 @@ from data import (
   delete_session_info,
   get_all_chats,
   add_message,
+  mark_readed_messages,
 )
 
 
@@ -77,31 +78,56 @@ def send_message(sender, receiver, message):
   return "OK"
 
 
+def read_messages(login, messages):
+  if not isinstance(messages, list):
+    raise ValueError("invalid type")
+  else:
+    parsed_info = []
+    for readed_info in messages:
+      parsed_info.append(
+        {
+          "sender": readed_info["sender"],
+          "receiver": login,
+          "timestamp": readed_info["timestamp"],
+        }
+      )
+    messages_to_send = mark_readed_messages(parsed_info)
+    for chat_name, messages in messages_to_send.items():
+      socketio.emit(
+        "read_messages",
+        messages,
+        to=chat_name,
+        include_self=True,
+        namespace=NAMESPACE,
+      )
+  return "OK"
+
+
 @app.route("/api", methods=["POST"])
 def api_handler():
-  # try:
-  data = json.loads(flask.request.data.decode("utf-8"))
-  print(json.dumps(data, indent=2))
-  action = data.pop("action")
-  if action in ["login", "register"]:
-    return login_and_register(action, data)
-  login = get_login_from_cookie()
-  if not login:
-    raise AttributeError("unathorized user")
-  if action == "logout":
-    response = flask.make_response("OK")
-    response.delete_cookie("login")
-    return response
-  elif action == "get_login":
-    return login
-  elif action == "get_chats":
-    result = get_all_chats(login)
-    return result
-  elif action == "send_message":
-    return send_message(login, data.get("receiver"), data.get("message"))
-  raise ValueError("unknown path")
-  # except Exception as error:
-  #   return make_ban(error)
+  try:
+    data = json.loads(flask.request.data.decode("utf-8"))
+    action = data.pop("action")
+    if action in ["login", "register"]:
+      return login_and_register(action, data)
+    login = get_login_from_cookie()
+    if not login:
+      raise AttributeError("unathorized user")
+    if action == "logout":
+      response = flask.make_response("OK")
+      response.delete_cookie("login")
+      return response
+    elif action == "get_login":
+      return login
+    elif action == "get_chats":
+      return get_all_chats(login)
+    elif action == "send_message":
+      return send_message(login, data.get("receiver"), data.get("message"))
+    elif action == "read_messages":
+      return read_messages(login, data.get("messages"))
+    raise ValueError("unknown path")
+  except Exception as error:
+    return make_ban(error)
 
 
 # Этот код нужен только для дебага (если nginx/nodejs не запущен)

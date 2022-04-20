@@ -7,11 +7,6 @@ state = {
   socket: undefined
 }
 
-#
-# socket.on('message', (msg) ->
-#   console.log('Received message', msg);
-# )
-
 export default {
   send_query: (data) ->
     result = await axios.post('/api', data)

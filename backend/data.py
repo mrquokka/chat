@@ -35,6 +35,7 @@ def get_message_info(message_obj):
       "sender": sender_login,
       "receiver": receiver_login,
       "message": message_obj.description,
+      "is_readed": message_obj.is_readed,
     },
   )
 
@@ -124,6 +125,7 @@ def add_message(sender, receiver, message):
       datetime=current_date,
       sender=sender,
       receiver=receiver,
+      is_readed=False,
     )
     unique_id, unix_time, data = get_message_info(message_obj)
     connection.hset(unique_id, unix_time, json.dumps(data))
@@ -131,3 +133,42 @@ def add_message(sender, receiver, message):
     session.commit()
   lock.release()
   return unique_id, unix_time, data
+
+
+def mark_readed_messages(messages_infos):
+  messages_to_read = {}
+  lock.acquire()
+  with sqlalchemy.orm.Session(engine) as session:
+    for item in messages_infos:
+      sender = item["sender"]
+      receiver = item["receiver"]
+      timestamp = item["timestamp"]
+      alias_sender = sqlalchemy.orm.aliased(User)
+      alias_receiver = sqlalchemy.orm.aliased(User)
+      message_date = datetime.datetime.fromtimestamp(float(timestamp))
+      message = (
+        session.query(Message)
+        .join(alias_sender, Message.sender)
+        .join(alias_receiver, Message.receiver)
+        .filter(
+          sqlalchemy.and_(
+            alias_sender.login == sender,
+            alias_receiver.login == receiver,
+            Message.datetime == message_date,
+          )
+        )
+        .first()
+      )
+      if not message:
+        raise AttributeError("hack attempt?")
+      if not message.is_readed:
+        message.is_readed = True
+        unique_id = make_unique_chat_id(sender, receiver)
+        if unique_id not in messages_to_read:
+          messages_to_read[unique_id] = []
+        messages_to_read[unique_id].append(
+          {"timestamp": timestamp, "sender": sender, "receiver": receiver}
+        )
+    session.commit()
+  lock.release()
+  return messages_to_read
