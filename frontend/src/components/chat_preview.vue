@@ -1,11 +1,14 @@
 <template>
   <div v-if="color" class="chat_preview">
     <div class="icon" :style="style_for_icon">
-      {{ user_preview }}
+      <i v-if="is_favorites" class="material-icons">star_border</i>
+      <template v-else>
+        {{ user_preview }}
+      </template>
     </div>
     <div class="labels">
-      <div class="user">{{ login }}</div>
-      <div class="tooltip">ds</div>
+      <div class="user">{{ login_label }}</div>
+      <div class="tooltip">{{ last_message }}</div>
     </div>
     <div class="clear_block" />
   </div>
@@ -16,14 +19,36 @@ import * as colors from "./../css/colors.scss"
 
 export default {
   props: {
+    current_user: {type: String, required: true}
     login: {type: String, required: true}
     chats: {type: Object, required: true}
+    user_messages: {type: Object, required: true}
   }
 
   data: () ->
     return {color: undefined}
 
   computed: {
+    is_favorites: () ->
+      return @current_user == @login
+
+    last_message: () ->
+      datetimes = Object.keys(@user_messages)
+      console.log datetimes
+      if datetimes.length == 0
+        if @is_favorites
+          return 'Здесь вы можете сохранить ваши заметки'
+        else
+          return @login + ' теперь в Qchat'
+      else
+        console.log datetimes.length
+        return @user_messages[datetimes[datetimes.length - 1]].message
+
+    login_label: () ->
+      if @is_favorites
+        return 'Избранное'
+      return @login
+
     user_preview: () ->
       return @login.slice(0, 2)
 
@@ -62,6 +87,10 @@ export default {
     line-height: 44px;
     border-radius: 6px;
     text-align: center;
+
+    > i {
+      line-height: 44px;
+    }
   }
 
   > .labels {
@@ -76,6 +105,10 @@ export default {
     > .tooltip {
       color: $second_text;
       font-size: 12px;
+      white-space: nowrap;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

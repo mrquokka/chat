@@ -50,6 +50,12 @@ def login_and_register(action, data):
     return "error_is_busy"
   else:
     add_user(login, get_hash_of_password(password))
+    socketio.emit(
+      "new_user",
+      login,
+      broadcast=True,
+      namespace=NAMESPACE,
+    )
   cookie = crypter.encrypt(login.encode("utf-8")).decode("utf-8")
   response = flask.make_response(login)
   response.set_cookie("login", value=cookie)
@@ -90,7 +96,6 @@ def api_handler():
     return login
   elif action == "get_chats":
     result = get_all_chats(login)
-    print(login, result)
     return result
   elif action == "send_message":
     return send_message(login, data.get("receiver"), data.get("message"))

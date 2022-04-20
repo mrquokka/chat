@@ -109,6 +109,7 @@ def get_all_chats(current_login):
 
 def add_message(sender, receiver, message):
   current_date = datetime.datetime.now()
+  lock.acquire()
   with sqlalchemy.orm.Session(engine) as session:
     sender = session.query(User).filter(User.login == sender).first()
     receiver = session.query(User).filter(User.login == receiver).first()
@@ -124,4 +125,5 @@ def add_message(sender, receiver, message):
     connection.hset(unique_id, unix_time, json.dumps(data))
     session.add(message_obj)
     session.commit()
-    return unique_id, unix_time, data
+  lock.release()
+  return unique_id, unix_time, data

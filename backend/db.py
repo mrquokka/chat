@@ -22,6 +22,7 @@ class Message(Base):
   __tablename__ = "message"
   id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
   description = sqlalchemy.Column(sqlalchemy.String)
+  is_readed = sqlalchemy.Column(sqlalchemy.String, default=False)
   datetime = sqlalchemy.Column(sqlalchemy.DateTime)
   sender_id = sqlalchemy.Column(
     sqlalchemy.Integer, sqlalchemy.ForeignKey("user.id")
