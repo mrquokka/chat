@@ -6,7 +6,7 @@ from config import CRYPT_KEY
 
 app = flask.Flask(__name__, static_url_path="")
 socketio = flask_socketio.SocketIO(
-  app, async_mode="gevent", namespace="/socket", logger=True
+  app, async_mode="gevent", namespace="/socket"
 )
 
 app.config.update(
