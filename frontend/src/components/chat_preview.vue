@@ -3,7 +3,12 @@
     <user_preview :current_user="current_user" :login="login" />
     <div class="labels">
       <div class="user">{{ login_label }}</div>
-      <div class="tooltip">{{ last_message }}</div>
+      <div class="tooltip" :class="{ short: message_time }">
+        <div class="last_message">
+          {{ last_message }}
+        </div>
+        <div v-if="message_time" class="message_time" v-html="message_time" />
+      </div>
     </div>
     <div class="clear_block" />
   </div>
@@ -11,6 +16,7 @@
 
 <script lang="coffee">
 import user_preview from './user_preview.vue'
+import main_helpers from './../helpers/main.coffee'
 
 export default {
   components: {
@@ -26,6 +32,13 @@ export default {
   }
 
   computed: {
+    message_time: () ->
+      unix_times = Object.keys(@user_messages)
+      if unix_times.length == 0
+        return undefined
+      else
+        return main_helpers.print_date(unix_times[0], true)
+
     is_current: () ->
       return @selected_user == @login
 
@@ -68,7 +81,8 @@ export default {
     line-height: 22px;
 
     > .user,
-    > .tooltip {
+    > .tooltip,
+    > .last_message {
       white-space: nowrap;
       width: 100%;
       overflow: hidden;
@@ -82,6 +96,21 @@ export default {
     > .tooltip {
       color: $second_text;
       font-size: 12px;
+
+      &.short {
+        display: flex;
+        flex-direction: row;
+
+        > .last_message {
+          flex: 1 1 auto;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        > .message_time {
+          flex: 0 0 auto;
+        }
+      }
     }
   }
 

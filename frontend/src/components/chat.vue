@@ -19,7 +19,12 @@
       </div>
     </div>
     <form class="text_container" v-on:submit.prevent.stop="confirm_form">
-      <div contenteditable="true" v-on:input="edit_text" />
+      <div
+        ref="input"
+        contenteditable="true"
+        v-on:input="edit_text"
+        v-on:keyup="handler_keyup"
+      />
       <button><i class="material-icons">send</i></button>
     </form>
   </div>
@@ -46,7 +51,15 @@ export default {
       current_text: ''
     }
 
+  mounted: () ->
+    @$refs.input.focus()
+
   methods: {
+    handler_keyup: (event) ->
+      if event.code == 'Enter' and not event.ctrlKey and not event.shiftKey
+        @confirm_form()
+      return
+
     print_date: (unix_time) ->
       return main_helpers.print_date(unix_time, false)
 
@@ -57,7 +70,10 @@ export default {
       text = @current_text.trim()
       if text.length == 0
         return
+      @$refs.input.blur()
       @$emit('send_message', text)
+      @current_text = ''
+      @$refs.input.innerText = null
   }
 }
 </script>

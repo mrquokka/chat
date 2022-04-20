@@ -78,8 +78,6 @@ export default {
           chat_info[timestamp] = messages_infos[timestamp]
           if timestamp > login_max
             login_max = timestamp
-        if login_max == 0
-          login_max = Number.MAX_SAFE_INTEGER
         if login_max not of by_users
           by_users[login_max] = {}
         by_users[login_max][login] = chat_info
