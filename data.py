@@ -9,11 +9,16 @@ import flask_socketio
 from config import NAMESPACE
 from db import lock, User, Message, engine, Base
 
-# TODO postgres + sqlalchemy
 connection = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
 KEY_FOR_LOGINGS = "logins"
 KEY_FOR_SESSIONS = "sessions"
 PREFIX_FOR_CHATS = "chat"
+
+connection.delete(KEY_FOR_LOGINGS)
+connection.delete(KEY_FOR_SESSIONS)
+
+if not sqlalchemy.inspect(engine).has_table(User.__tablename__):
+  Base.metadata.create_all(engine)
 
 
 def make_unique_chat_id(login1, login2):
@@ -38,12 +43,6 @@ def get_message_info(message_obj):
     },
   )
 
-
-# Полная очистка
-Base.metadata.drop_all(engine)
-Base.metadata.create_all(engine)
-connection.delete(KEY_FOR_LOGINGS)
-connection.delete(KEY_FOR_SESSIONS)
 
 # Очистка только кэша
 connection.flushdb()

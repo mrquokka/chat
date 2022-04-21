@@ -121,7 +121,7 @@ export default {
   }
 
   watch: {
-    is_show_password_error: () ->
+    is_on_register: () ->
       @is_show_password_error = false
   }
 
