@@ -5,9 +5,7 @@ import sqlalchemy.orm
 
 
 Base = sqlalchemy.orm.declarative_base()
-engine = sqlalchemy.create_engine(
-  "postgresql://postgres:postgres@localhost/chat"
-)
+engine = sqlalchemy.create_engine("postgresql://postgres:postgres@db/postgres")
 lock = threading.Lock()
 
 

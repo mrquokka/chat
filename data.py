@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 
 import redis
 import sqlalchemy
@@ -9,9 +10,7 @@ from config import NAMESPACE
 from db import lock, User, Message, engine, Base
 
 # TODO postgres + sqlalchemy
-connection = redis.Redis(
-  host="localhost", port=6379, db=0, decode_responses=True
-)
+connection = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
 KEY_FOR_LOGINGS = "logins"
 KEY_FOR_SESSIONS = "sessions"
 PREFIX_FOR_CHATS = "chat"
@@ -41,10 +40,10 @@ def get_message_info(message_obj):
 
 
 # Полная очистка
-# Base.metadata.drop_all(engine)
-# Base.metadata.create_all(engine)
-# connection.delete(KEY_FOR_LOGINGS)
-# connection.delete(KEY_FOR_SESSIONS)
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
+connection.delete(KEY_FOR_LOGINGS)
+connection.delete(KEY_FOR_SESSIONS)
 
 # Очистка только кэша
 connection.flushdb()
