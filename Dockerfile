@@ -13,4 +13,4 @@ EXPOSE 8080
 RUN ls -la
 WORKDIR /server/
 COPY main.py /server/
-CMD ["gunicorn", "--worker-class", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "main:app"]
+CMD ["python", "main.py"]
