@@ -19,19 +19,7 @@ TODO:
 </ul>
 STEPS TO RUN
 <ul>
-  <li>sudo apt install postgresql redis python3-setuptools</li>
-  <li> install nodejs v17<br />
-  # Using Ubuntu<br />
-  curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash -<br />
-  sudo apt-get install -y nodejs<br />
-  </li>
-  <li>create postgres database chat</li>
-  <li>change db user postgres password to 'postgres'</li>
-  <li>cd frontend/</li>
-  <li>npm run build</li>
-  <li>cd ../backend/</li>
-  <li>pip3 install -r requirements.txt</li>
-  <li>python app.py</li>
+  <li>docker-compose up</li>
 </ul>
 
 
