@@ -12,7 +12,7 @@ module.exports = defineConfig({
     }
   },
   transpileDependencies: true,
-  outputDir: './../static/',
+  outputDir: '/static',
   devServer: {
     proxy: {
       '/api': {

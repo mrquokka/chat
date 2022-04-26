@@ -6,11 +6,9 @@ RUN apt-get install -y nodejs
 WORKDIR /server/frontend
 RUN npm i
 RUN npm run build
-
 WORKDIR /server/
 RUN pip install -r requirements.txt
-EXPOSE 8080
-RUN ls -la
+EXPOSE 5000
 WORKDIR /server/
 COPY main.py /server/
-CMD ["python", "main.py"]
+CMD ["/bin/sh", "build.sh"]
