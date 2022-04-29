@@ -1,6 +1,7 @@
 Frontend - Vue.JS (3 version) chat + socket.io
 Backend - Python + Flask-socketIO + redis (cache) + postgresql (db)
-<a href="http://mrquokka.tmweb.ru">demo</a>
+
+<a href="http://mrquokka.tmweb.ru">Demo</a>
 
 Features:
 <ul>
