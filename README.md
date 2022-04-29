@@ -1,5 +1,6 @@
 Frontend - Vue.JS (3 version) chat + socket.io
 Backend - Python + Flask-socketIO + redis (cache) + postgresql (db)
+<a href="http://mrquokka.tmweb.ru">demo</a>
 
 Features:
 <ul>
@@ -25,3 +26,6 @@ STEPS TO RUN
 
 Chat list
 ![image](https://user-images.githubusercontent.com/36193265/164279233-78ee8679-605c-4e15-8f73-0132542ec2f9.png)
+
+Chat
+![image](https://user-images.githubusercontent.com/36193265/165949062-2f38542b-6483-45c5-b6e9-76ca45009c42.png)
