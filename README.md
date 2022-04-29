@@ -24,6 +24,8 @@ STEPS TO RUN
   <li>docker-compose up</li>
 </ul>
 
+Login/Register
+![image](https://user-images.githubusercontent.com/36193265/165949284-731fe698-f675-4c42-942e-fa36475cacf6.png)
 
 Chat list
 ![image](https://user-images.githubusercontent.com/36193265/164279233-78ee8679-605c-4e15-8f73-0132542ec2f9.png)
