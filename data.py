@@ -9,7 +9,14 @@ import flask_socketio
 from config import NAMESPACE
 from db import lock, User, Message, engine, Base
 
-connection = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
+print()
+
+connection = redis.Redis(
+  host=os.environ.get("POSTREDIS_HOSTGRES_HOST", None) or "localhost",
+  port=6379,
+  db=0,
+  decode_responses=True,
+)
 KEY_FOR_LOGINGS = "logins"
 KEY_FOR_SESSIONS = "sessions"
 PREFIX_FOR_CHATS = "chat"

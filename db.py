@@ -1,3 +1,4 @@
+import os
 import threading
 
 import sqlalchemy
@@ -5,7 +6,11 @@ import sqlalchemy.orm
 
 
 Base = sqlalchemy.orm.declarative_base()
-engine = sqlalchemy.create_engine("postgresql://postgres:postgres@db/postgres")
+engine = sqlalchemy.create_engine(
+  "postgresql://postgres:postgres@{}/postgres".format(
+    os.environ.get("POSTGRES_HOST", None) or "localhost"
+  )
+)
 lock = threading.Lock()
 
 
